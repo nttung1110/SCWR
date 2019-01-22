@@ -1,0 +1,157 @@
+import numpy as np
+import cv2 as cv
+import os
+import scipy.optimize as opt
+from numpy import loadtxt, where, zeros, e, array, log, ones, append, linspace
+from pylab import scatter, show, legend, xlabel, ylabel, contour, title
+def im2double(im):
+    min_val = np.min(im.ravel())
+    max_val = np.max(im.ravel())
+    out = (im.astype('float') - min_val) / (max_val - min_val)
+    return out
+def sigmoid(values):
+    return 1/(1+np.exp(-values))
+def Cost_Function_regulariztion(theta,X,y,lambdas,m):
+    h = sigmoid(X.dot(theta)/15001)
+    thetaR = theta[1:]
+    J = (1.0 / m) * ((-y.T.dot(np.log(h))) - ((1 - y).T.dot(np.log(1.0 - h)))) + (lambdas / (2.0 * m)) * (thetaR.T.dot(thetaR))
+    return np.array(J)
+def Gradient_for_f(theta,X,y,lambdas,m):
+    h = sigmoid(X.dot(theta)/15001)
+    dif = h - y
+    gradient = (1 / m) * (np.transpose(X).dot(dif)) + (lambdas / m) * theta
+    gradient[0] = gradient[0] - (lambdas / m) * theta[0]  # not regularized the bias theta0
+    return np.array(gradient)
+def Batch_Gradient_Descent(theta,X,y,lambdas,m,learningrate):
+    tmp=Gradient_for_f(theta,X,y,lambdas,m)
+    new_theta=theta-learningrate*tmp
+    return new_theta
+def Batch_Gradient_Descent_With_Momentum(theta,X,y,lambdas,m,learningrate,velocity_old):
+    updated_theta=theta
+    grad=Gradient_for_f(theta,X,y,lambdas,m)
+    gamma=0.9
+    velocity_new=gamma*velocity_old+learningrate*grad
+    updated_theta=updated_theta-velocity_new
+    return updated_theta,velocity_new
+def error_calculating(theta,X,Y):
+    error=0
+    for i in range(len(X)):
+        if ((Y[i] == 0 and sigmoid(X[i].T.dot(theta) / 15001) >= 0.5) or (
+                Y[i] == 1 and sigmoid(X[i].T.dot(theta) / 15001) < 0.5)):
+            error+=1
+    return error/len(X)
+def training_progress_Nomomentum(X,Y,m,initial_theta,max_iteration,learning_rates):
+    updated_theta = initial_theta
+    for i in range(max_iteration):
+        print("Current cost:", Cost_Function_regulariztion(updated_theta, X, Y, 0, m))
+        updated_theta = Batch_Gradient_Descent(updated_theta, X, Y, 0, m, learning_rates)
+    return updated_theta
+def training_progress_Withmomentum(X,Y,m,initial_theta,max_iteration,learning_rates):
+    updated_theta = initial_theta
+    velocity_old=np.zeros_like(initial_theta)
+    for i in range(max_iteration):
+        print("Current cost:", Cost_Function_regulariztion(updated_theta, X, Y, 0, m))
+        updated_theta,velocity_old = Batch_Gradient_Descent_With_Momentum(updated_theta, X, Y, 0, m, learning_rates,velocity_old)
+    return updated_theta
+id = 0
+imgpath = r'C:\Users\USER\PycharmProjects\untitled1\SC\AllData'
+undetermined=0
+input=[]#1400 images
+validate=[]#500 images
+test=[]#523
+ActualvaluesClosed=[]
+Actualvalues=[]#A list representing whether the index image open or closed(training)
+ActualvaluesValidate=[]#validateset
+ActualvaluesTest=[]#testset
+for image_name in (os.listdir(imgpath))[:]:
+    if image_name.endswith('.jpg'):
+        print(id)
+        id += 1
+        img = cv.imread(imgpath + '\\' + image_name)
+        for i in range(len(img)):
+            for j in range(len(img[i])):
+                img[i][j] = img[i][j][0] / 3 + img[i][j][1] / 3 + img[i][j][2] / 3
+        img=im2double(img)
+        img = np.reshape(img, 30000)#30000 features
+        img=img[:15000]
+        EachImage=[1]#Bias Feature
+        for i in range(len(img)):
+         EachImage.append(img[i])
+        if(id<1400):#training
+            EachImage=np.array(EachImage)
+            input.append(EachImage)
+            if image_name.endswith('open.jpg'):
+                Actualvalues.append(1)
+                ActualvaluesClosed.append(0)
+            else:
+                Actualvalues.append(0)
+                ActualvaluesClosed.append(1)
+        elif (id >= 1400 and id < 1900):#validate
+            EachImage = np.array(EachImage)
+            validate.append(EachImage)
+            if image_name.endswith('open.jpg'):
+                ActualvaluesValidate.append(1)
+            else:
+                ActualvaluesValidate.append(0)
+        else:#test
+            EachImage = np.array(EachImage)
+            test.append(EachImage)
+            if image_name.endswith('open.jpg'):
+                ActualvaluesTest.append(1)
+            else:
+                ActualvaluesTest.append(0)
+input=np.array(input)
+validate=np.array(validate)
+test=np.array(test)
+Actualvalues=np.array(Actualvalues)
+ActualvaluesClosed=np.array(ActualvaluesClosed)
+ActualvaluesValidate=np.array(ActualvaluesValidate)
+ActualvaluesTest=np.array(ActualvaluesTest)
+m=Actualvalues.shape[0]
+mylambda=3.0
+max1=10
+#for i in range(1000):
+initial_theta=np.random.randn(len(EachImage))#Number Of Feature + biased
+learning_rates=100
+maxiteration=2200
+count=0
+print(len(validate))
+print(len(test))
+print(len(input))
+error_train=[]
+error_validate=[]
+tmpinput=input[0:1,:]
+tmpActualvalues=Actualvalues[0:1]
+print(Cost_Function_regulariztion(initial_theta,tmpinput,tmpActualvalues,0,1))
+#for i in range(1,len(input)+1):#i training examples
+    #tmpinput=input[0:i,:]
+    #tmpActualvalues=Actualvalues[0:i]
+    #print('WITH '+str(i) +' training examples ')
+initial_theta = np.random.randn(len(EachImage))
+print('Optimizing theta open.')
+optimize_theta_open=training_progress_Withmomentum(input,Actualvalues,m,initial_theta,maxiteration,learning_rates)
+print('Optimizing theta closed.')
+optimize_theta_closed=training_progress_Withmomentum(input,ActualvaluesClosed,m,initial_theta,maxiteration,learning_rates)
+    #error_train.append(error_calculating(optimize_theta,tmpinput,tmpActualvalues))
+    #error_validate.append(error_calculating(optimize_theta,validate,ActualvaluesValidate))
+    #print('Error train with ' + str(i) +' training examples :',error_train[i-1])
+    #print('Error validate with ' + str(i) +'training examples:',error_validate[i-1])
+    #if(i==1):
+       # break
+#for i in range(len(error_train)):
+   # print("Error train:",error_train[i],"Error validate:",error_validate[i])
+print("Error test:",error_calculating(optimize_theta_open,test,ActualvaluesTest))
+tmp=optimize_theta_open[1:]
+tmp=np.reshape(tmp,(50,100,3))
+tmp=im2double(tmp)
+tmp1=optimize_theta_closed[1:]
+tmp1=np.reshape(tmp1,(50,100,3))
+tmp1=im2double(tmp1)
+cv.imshow('h',tmp)
+cv.waitKey(0)
+cv.imshow('h1',tmp1)
+cv.waitKey(0)
+for i in range(len(test)):
+   if ((ActualvaluesTest[i] == 1 and test[i].T.dot(optimize_theta_open)>test[i].T.dot(optimize_theta_closed)) or (ActualvaluesTest[i] == 0 and  test[i].T.dot(optimize_theta_closed)>test[i].T.dot(optimize_theta_open))):
+        count+=1
+print(count)

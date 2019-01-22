@@ -1,0 +1,25 @@
+manually method can't see the underlying structure of the data but just give an overview of what we see=>low accuracy
++Why don't we let the machine learn structure from the data =>more accuracy
++Using a specific training model to learn from the data =>logistic regression(used for classification model)
+How can we do it?
+1.Preparing data
++Input:Grey Scalling doesn't work well with this approach because what input we need in this approach is a balanced dataset(but grey scaling remove some of
+the row of the matrix pixels =>using raw images )
++Unrolled each image pixel information into a vector 30000 elements.
+=>2423 images has a matrix of size 2423x30000=>Matrix X
++Read the actual label of images into vector Y(1 if open and 0 if close)
++Divind into 3 sets:
+ Training set:input,Actualvalues
+ Validate set:validate,ActualvaluesValidate
+ Test set:test,ActualvaluesTest
+2.Training Process:
++Sigmoid func:return a value from range of 0 to 1
++Cost Function using log func (what we want is minize this kind of function and return a vector of parameters that minize this).
+ -How to minize this=>First approach batch gradient descent ,initialize parameters at a specific location and then it will go "Downhill" converge to local or
+global minimum
+ .Problem with this method :Cost too many iterations and must choose a specific learning rates=>Solution:Using another kind of gradient descent called 
+ momentum gradient descent(the same as a ball rolling down the hill)
+ .After finding this parameters use it calculate the value of the validate error
++Misclassification error func...
+With this kind of training model , we think that it will overfit because there are too many features control the cost function makes our curves go closely through
+all the data points =>BUT NO  because it generalize validate set well with accuracy of 85%

@@ -1,0 +1,28 @@
+Step for training with logistic regression:
+1.Import dataset:
+ +First Approach:Using threshold images as dataset=>unrolled an images into vectors=>we have a matrix X as dataset (each row is each images)
+ .Problem with this approach:After preprocessing some of the information about images missing make our dataset unbalanced
+ (For example:Image 1 has 1000 features but image 2 only has 987 features ,how can we fill into the rest?)
+ +Another Approach:Using raw images as dataset=>unrolled an images into vectors(each image is a vector with 30000 features)=>Matrix X
+ as dataset
+ +Import vector Y as actual values(open images=>1 closed images=>0
+ +Dividing into train validate and test set(60 20 20)
+2.Building model:
+ Logistic regression model has following attributes to handle with:
+ *Function:
+   +Sigmoid function:which takes any real numbers and return a floating number in range between 0 and 1
+   +Cost_function:Compute the total loss values of all the images(what we want is to minimize this cost_function)
+   +Gradient Descent:Return partial derivative of all the parameter of the cost_function
+ *Parameters:
+   +Optimize_theta:this is what we want to find which will be the final solution for minimizing the Cost_Function 
+3.Training process:
+ +First approach:Batch_Gradient Descent will be used to find the optimized theta everytime new theta will be updated by substracting the mulplication b
+between learning rates and partial derivatives
+ BUT BIG PROBLEM HAPPENS:How can we ensure that we will approach the global minimum ? How many iteration do we have to make for 
+convergence?Which learning rates should be chosen?
+ +Another approach:Instead of using small learning rates and loops to many times for gradient descent (up to 100000) we use another method for
+gradient descent called momentum 
+ How momentum works?
+ +Imagine a ball is rolling down hill . How long it will reach the deepest valley depends on its momentum =>faster
+4.Accuracy:
+ +85%

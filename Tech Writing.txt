@@ -1,0 +1,6 @@
+Abtract:
+0.Overview/background/intro
+1.What you will do?(Reimplement or improve or redo the existing experiment
+2.Motivation(improve efficiency of method or solve realistic problem)
+3.Main results/key figures/important factors
+4.Impact on anything (surely it happens) (not a PROMISE for a future work)
